@@ -31,18 +31,26 @@ jobs:
 
           mkdir -p audit
 
-          awk -v actor="$ACTOR" -v ts="$TIMESTAMP" '
+          # Normalize line endings and parse checklist
+          echo "$PR_BODY" | sed 's/\r$//' | awk -v actor="$ACTOR" -v ts="$TIMESTAMP" '
             /^### / {
               section = substr($0, 5)
               next
             }
 
-            /^- \[[ x]\]/ && section != "" {
-              status = ($0 ~ /\[x\]/) ? "Checked" : "Unchecked"
-              item = substr($0, 7)
+            /^[[:space:]]*-[[:space:]]*\[[ x]\][[:space:]]+/ && section != "" {
+              status = ($0 ~ /\[[xX]\]/) ? "Checked" : "Unchecked"
+
+              # Remove "- [x] " or "- [ ] "
+              item = $0
+              sub(/^[[:space:]]*-[[:space:]]*\[[ x]\][[:space:]]+/, "", item)
+
+              # Remove HTML comments
+              sub(/[[:space:]]*<!--.*-->/, "", item)
+
               print "| " section " | " item " | " status " | " actor " | " ts " |"
             }
-          ' <<< "$PR_BODY" > audit/audit.log
+          ' > audit/audit.log
 
           echo "audit_table<<EOF" >> $GITHUB_OUTPUT
           cat audit/audit.log
@@ -59,3 +67,10 @@ jobs:
             | Section | Item | Status | Actor | Timestamp |
             |--------|------|--------|-------|-----------|
             ${{ steps.audit.outputs.audit_table }}
+
+      - name: Upload audit artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr-checklist-audit-${{ github.event.pull_request.number }}
+          path: audit/audit.log
+
