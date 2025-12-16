@@ -22,3 +22,36 @@ jobs:
             exit 1
           fi
           echo "✅ No 'No' selections found."
+
+      - name: Generate audit log
+        id: audit
+        run: |
+          PR_BODY="${{ github.event.pull_request.body }}"
+          ACTOR="${{ github.actor }}"
+          TIMESTAMP="$(date -u +"%Y-%m-%d %H:%M UTC")"
+
+          # Extract all newly checked items (lines with - [x])
+          mkdir -p audit
+          echo "$PR_BODY" | grep '\- \[x\]' | sed "s/^- \[x\] /| /; s/$/ | $ACTOR | $TIMESTAMP |/" > audit/audit.log
+
+          cat audit/audit.log
+
+      - name: Post audit comment to PR
+        uses: peter-evans/create-or-update-comment@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            ## PR Checklist Audit
+            | Checklist Item | Checked By | Timestamp |
+            |----------------|-----------|-----------|
+            ${{ steps.audit.outputs.audit_table || '' }}
+        env:
+          # Make audit log output available to comment step
+          AUDIT_TABLE: ${{ steps.audit.outputs.audit_table }}
+
+      - name: Upload audit artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: pr-checklist-audit-${{ github.event.pull_request.number }}
+          path: audit/audit.log
