@@ -1,0 +1,58 @@
+name: PR Checklist
+description: Required checklist for all pull requests
+
+body:
+  - type: dropdown
+    id: phpstan
+    attributes:
+      label: Included in PHPStan?
+      options:
+        - Yes
+        - No
+        - N/A
+    validations:
+      required: true
+
+  - type: dropdown
+    id: phpcs
+    attributes:
+      label: Included in PHPCS?
+      options:
+        - Yes
+        - No
+        - N/A
+    validations:
+      required: true
+
+  - type: dropdown
+    id: eslint
+    attributes:
+      label: Included in ESLint?
+      options:
+        - Yes
+        - No
+        - N/A
+    validations:
+      required: true
+
+  - type: dropdown
+    id: unit_tests
+    attributes:
+      label: Have unit tests been added?
+      options:
+        - Yes
+        - No
+        - N/A
+    validations:
+      required: true
+
+  - type: dropdown
+    id: vip
+    attributes:
+      label: No new errors or warnings in VIP Dashboard?
+      options:
+        - Yes
+        - No
+        - N/A
+    validations:
+      required: true

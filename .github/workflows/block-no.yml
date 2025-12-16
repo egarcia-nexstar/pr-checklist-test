@@ -5,7 +5,7 @@ on:
     types: [opened, edited, synchronize, ready_for_review]
 
 jobs:
-  block-no:
+  validate:
     runs-on: ubuntu-latest
     steps:
       - name: Read PR body
@@ -13,9 +13,9 @@ jobs:
           BODY="$(jq -r '.pull_request.body' "$GITHUB_EVENT_PATH")"
           echo "$BODY" > body.txt
 
-          if grep -E "^- \[[xX]\] No" body.txt; then
+          if grep -q "^.*No$" body.txt; then
             echo "❌ Checklist contains 'No'. Fix before merging."
             exit 1
           fi
 
-          echo "✔ No 'No' selections found."
+          echo "✔ Checklist validation passed."
