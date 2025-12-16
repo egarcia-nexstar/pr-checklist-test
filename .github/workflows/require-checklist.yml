@@ -22,7 +22,7 @@ jobs:
           fi
           echo "✅ No 'No' selections found."
 
-      - name: Generate audit log
+      - name: Generate full checklist audit
         id: audit
         run: |
           PR_BODY="${{ github.event.pull_request.body }}"
@@ -31,31 +31,29 @@ jobs:
 
           mkdir -p audit
 
-          # Convert all checked items into Markdown table rows
           awk -v actor="$ACTOR" -v ts="$TIMESTAMP" '
-            /^- \[x\]/ {
-              item = substr($0,7)  # remove leading "- [x] "
-              print "| " item " | " actor " | " ts " |"
-            }' <<< "$PR_BODY" > audit/audit.log
+            /^### / {
+              section = substr($0, 5)
+            }
+            /^- \[[x ]\]/ {
+              status = ($0 ~ /\[x\]/) ? "Checked" : "Unchecked"
+              item = substr($0, 7)
+              print "| " section " | " item " | " status " | " actor " | " ts " |"
+            }
+          ' <<< "$PR_BODY" > audit/audit.log
 
-          # Expose as multi-line output (preserves newlines)
           echo "audit_table<<EOF" >> $GITHUB_OUTPUT
           cat audit/audit.log
           echo "EOF" >> $GITHUB_OUTPUT
 
-      - name: Post audit comment to PR
+      - name: Post checklist audit to PR
         uses: peter-evans/create-or-update-comment@v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           issue-number: ${{ github.event.pull_request.number }}
           body: |
-            ## PR Checklist Audit
-            | Checklist Item | Checked By | Timestamp |
-            |----------------|-----------|-----------|
-            ${{ steps.audit.outputs.audit_table }}
+            ## PR Checklist Audit (Current State)
 
-      - name: Upload audit artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: pr-checklist-audit-${{ github.event.pull_request.number }}
-          path: audit/audit.log
+            | Section | Item | Status | Actor | Timestamp |
+            |--------|------|--------|-------|-----------|
+            ${{ steps.audit.outputs.audit_table }}
