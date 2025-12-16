@@ -1,0 +1,15 @@
+name: Require Checklist
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, ready_for_review]
+
+jobs:
+  require-checklist:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: mheap/github-action-require-checklist@v4
+        with:
+          requireChecklist: true
+          requireRadioGroups: true
+          allowEmptyChecklist: false

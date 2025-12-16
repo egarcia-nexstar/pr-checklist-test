@@ -1,0 +1,21 @@
+name: Block PR if No Selected
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, ready_for_review]
+
+jobs:
+  block-no:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Read PR body
+        run: |
+          BODY="$(jq -r '.pull_request.body' "$GITHUB_EVENT_PATH")"
+          echo "$BODY" > body.txt
+
+          if grep -E "^- \[[xX]\] No" body.txt; then
+            echo "❌ Checklist contains 'No'. Fix before merging."
+            exit 1
+          fi
+
+          echo "✔ No 'No' selections found."
