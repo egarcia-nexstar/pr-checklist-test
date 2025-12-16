@@ -5,11 +5,10 @@ on:
     types: [opened, edited, synchronize, ready_for_review]
 
 jobs:
-  require-checklist:
+  checklist:
     runs-on: ubuntu-latest
     steps:
-      - uses: mheap/github-action-require-checklist@v4
+      - uses: mheap/require-checklist-action@v2
         with:
           requireChecklist: true
-          requireRadioGroups: true
           allowEmptyChecklist: false
