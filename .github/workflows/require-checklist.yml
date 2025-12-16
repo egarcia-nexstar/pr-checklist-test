@@ -1,4 +1,4 @@
-name: Block PR if No Selected
+name: Require Checklist
 
 on:
   pull_request:
@@ -8,14 +8,15 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
-      - name: Read PR body
+      - uses: mheap/require-checklist-action@v2
+        with:
+          requireChecklist: true
+          allowEmptyChecklist: false
+
+      - name: Block PR if No selected
         run: |
           BODY="$(jq -r '.pull_request.body' "$GITHUB_EVENT_PATH")"
-          echo "$BODY" > body.txt
-
-          if grep -q "^.*No$" body.txt; then
+          if grep -E "^- \[[xX]\] No" <<< "$BODY"; then
             echo "❌ Checklist contains 'No'. Fix before merging."
             exit 1
           fi
-
-          echo "✔ Checklist validation passed."
