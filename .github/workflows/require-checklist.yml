@@ -5,57 +5,76 @@ on:
     types: [opened, edited, synchronize, reopened]
 
 jobs:
-  job1:
+  checklist:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: mheap/require-checklist-action@v2
+      # 1. Enforce that exactly one checkbox is selected per TaskRadio group
+      - name: Require checklist selection
+        uses: mheap/require-checklist-action@v2
         with:
           requireChecklist: true
 
+      # 2. Fail the PR if ANY "No" option is checked
       - name: Fail if any 'No' is selected
-        id: fail_no
         run: |
           echo "Checking for 'No' selections..."
-          if echo "${{ github.event.pull_request.body }}" | grep -q "\- \[x\] No"; then
-            echo "❌ One or more checklist items are marked 'No'. Failing PR."
+          if printf "%s\n" "${{ github.event.pull_request.body }}" | grep -q '\- \[x\] No'; then
+            echo "❌ One or more checklist items are marked 'No'."
             exit 1
           fi
           echo "✅ No 'No' selections found."
 
+      # 3. Generate FULL checklist audit (entire form, every run)
       - name: Generate full checklist audit
         id: audit
+        shell: bash
         run: |
+          set -euo pipefail
+
           PR_BODY="${{ github.event.pull_request.body }}"
           ACTOR="${{ github.actor }}"
           TIMESTAMP="$(date -u +"%Y-%m-%d %H:%M UTC")"
 
           mkdir -p audit
 
-          # Normalize line endings and parse checklist
-          printf "%s\n" "$PR_BODY" | tr -d '\r' | awk -v actor="$ACTOR" -v ts="$TIMESTAMP" '
-            /^### / {
-              section = substr($0, 5)
-              next
-            }
+          # Normalize CRLF → LF
+          printf "%s\n" "$PR_BODY" | tr -d '\r' > audit/body.txt
 
-            /^- \[[x ]\]/ {
-              status = ($0 ~ /\[x\]/) ? "Checked" : "Unchecked"
+          CURRENT_SECTION=""
 
-              # Remove "- [x] " or "- [ ] "
-              item = substr($0, 7)
+          {
+            echo "| Section | Item | Status | Actor | Timestamp |"
+            echo "|--------|------|--------|-------|-----------|"
 
-              # Strip HTML comments
-              sub(/<!--.*-->/, "", item)
-              gsub(/[[:space:]]+$/, "", item)
+            while IFS= read -r line; do
+              # Section headers
+              if [[ "$line" =~ ^###[[:space:]]+(.*)$ ]]; then
+                CURRENT_SECTION="${BASH_REMATCH[1]}"
+                continue
+              fi
 
-              print "| " section " | " item " | " status " | " actor " | " ts " |"
-            }
-          ' > audit/audit.log
+              # Checklist items
+              if [[ "$line" =~ ^-[[:space:]]+\[[x[:space:]]\][[:space:]]+(.*)$ ]]; then
+                ITEM="${BASH_REMATCH[1]}"
+                STATUS="Unchecked"
 
-          echo "audit_table<<EOF" >> $GITHUB_OUTPUT
-          cat audit/audit.log
-          echo "EOF" >> $GITHUB_OUTPUT
+                [[ "$line" =~ \[x\] ]] && STATUS="Checked"
 
+                # Remove HTML comments
+                ITEM="$(sed 's/<!--.*-->//g' <<< "$ITEM" | xargs)"
+
+                echo "| $CURRENT_SECTION | $ITEM | $STATUS | $ACTOR | $TIMESTAMP |"
+              fi
+            done < audit/body.txt
+          } > audit/audit.log
+
+          # Expose as multiline output (this is critical)
+          echo "audit_table<<EOF" >> "$GITHUB_OUTPUT"
+          sed '1,2d' audit/audit.log >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+
+      # 4. Post audit comment to PR
       - name: Post checklist audit to PR
         uses: peter-evans/create-or-update-comment@v5
         with:
@@ -68,6 +87,7 @@ jobs:
             |--------|------|--------|-------|-----------|
             ${{ steps.audit.outputs.audit_table }}
 
+      # 5. Upload audit artifact (optional but useful)
       - name: Upload audit artifact
         uses: actions/upload-artifact@v4
         with:
