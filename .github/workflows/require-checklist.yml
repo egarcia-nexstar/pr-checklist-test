@@ -32,21 +32,21 @@ jobs:
           mkdir -p audit
 
           # Normalize line endings and parse checklist
-          echo "$PR_BODY" | sed 's/\r$//' | awk -v actor="$ACTOR" -v ts="$TIMESTAMP" '
+          printf "%s\n" "$PR_BODY" | tr -d '\r' | awk -v actor="$ACTOR" -v ts="$TIMESTAMP" '
             /^### / {
               section = substr($0, 5)
               next
             }
 
-            /^[[:space:]]*-[[:space:]]*\[[ x]\][[:space:]]+/ && section != "" {
-              status = ($0 ~ /\[[xX]\]/) ? "Checked" : "Unchecked"
+            /^- \[[x ]\]/ {
+              status = ($0 ~ /\[x\]/) ? "Checked" : "Unchecked"
 
               # Remove "- [x] " or "- [ ] "
-              item = $0
-              sub(/^[[:space:]]*-[[:space:]]*\[[ x]\][[:space:]]+/, "", item)
+              item = substr($0, 7)
 
-              # Remove HTML comments
-              sub(/[[:space:]]*<!--.*-->/, "", item)
+              # Strip HTML comments
+              sub(/<!--.*-->/, "", item)
+              gsub(/[[:space:]]+$/, "", item)
 
               print "| " section " | " item " | " status " | " actor " | " ts " |"
             }
