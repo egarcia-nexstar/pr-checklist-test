@@ -8,6 +8,9 @@ None.
 
 ## PR Checklist
 
+Select exactly ONE option per section.
+PRs will fail if this checklist is incomplete or invalid.
+
 ### Included in PHPStan
 
 - [ ] Yes <!-- TaskRadio phpstan -->
@@ -16,9 +19,9 @@ None.
 
 ### Included in PHPCS
 
-- [ ] Yes <!-- TaskRadio phpscs -->
-- [ ] No <!-- TaskRadio phpscs -->
-- [ ] N/A <!-- TaskRadio phpscs -->
+- [ ] Yes <!-- TaskRadio phpcs -->
+- [ ] No <!-- TaskRadio phpcs -->
+- [ ] N/A <!-- TaskRadio phpcs -->
 
 ### Included in ESLint
 

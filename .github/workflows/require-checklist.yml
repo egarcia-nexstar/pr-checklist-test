@@ -2,9 +2,7 @@ name: Require Checklist
 
 on:
   pull_request:
-    types: [opened, edited, synchronize]
-  issues:
-    types: [opened, edited, deleted]
+    types: [opened, edited, synchronize, reopened]
 
 jobs:
   job1:
@@ -12,4 +10,15 @@ jobs:
     steps:
       - uses: mheap/require-checklist-action@v2
         with:
-          requireChecklist: false # If this is true and there are no checklists detected, the action will fail
+          requireChecklist: true
+
+      - name: Fail if any checklist item is "No"
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          echo "Checking for 'No' selections in PR checklist..."
+          if echo "$PR_BODY" | grep -q "\- \[x\] No"; then
+            echo "❌ One or more checklist items are marked 'No'."
+            exit 1
+          fi
+          echo "✅ No 'No' selections found."
