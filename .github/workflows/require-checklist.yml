@@ -12,13 +12,12 @@ jobs:
         with:
           requireChecklist: true
 
-      - name: Fail if any checklist item is "No"
-        env:
-          PR_BODY: ${{ github.event.pull_request.body }}
+      - name: Fail if any 'No' is selected
+        id: fail_no
         run: |
-          echo "Checking for 'No' selections in PR checklist..."
-          if echo "$PR_BODY" | grep -q "\- \[x\] No"; then
-            echo "❌ One or more checklist items are marked 'No'."
+          echo "Checking for 'No' selections..."
+          if echo "${{ github.event.pull_request.body }}" | grep -q "\- \[x\] No"; then
+            echo "❌ One or more checklist items are marked 'No'. Failing PR."
             exit 1
           fi
           echo "✅ No 'No' selections found."
