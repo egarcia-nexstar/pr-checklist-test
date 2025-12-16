@@ -31,12 +31,17 @@ jobs:
 
           mkdir -p audit
 
-          # Convert all checked items into a Markdown table row
-          echo "$PR_BODY" | grep '\- \[x\]' | sed "s/^- \[x\] /| /; s/$/ | $ACTOR | $TIMESTAMP |/" > audit/audit.log
+          # Convert all checked items into Markdown table rows
+          awk -v actor="$ACTOR" -v ts="$TIMESTAMP" '
+            /^- \[x\]/ {
+              item = substr($0,7)  # remove leading "- [x] "
+              print "| " item " | " actor " | " ts " |"
+            }' <<< "$PR_BODY" > audit/audit.log
 
-          # Expose as output
-          AUDIT_TABLE=$(cat audit/audit.log | sed ':a;N;$!ba;s/\n/\\n/g')
-          echo "audit_table=$AUDIT_TABLE" >> $GITHUB_OUTPUT
+          # Expose as multi-line output (preserves newlines)
+          echo "audit_table<<EOF" >> $GITHUB_OUTPUT
+          cat audit/audit.log
+          echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Post audit comment to PR
         uses: peter-evans/create-or-update-comment@v5
