@@ -6,32 +6,34 @@ None.
 
 - https://nexstardigital.atlassian.net/browse/WC-
 
-> ⚠️ Please select exactly one option per item.
-> PR will fail validation if left blank or multiple options are selected.
-
 ## PR Checklist
 
 ### Included in PHPStan
-- [ ] Yes
-- [ ] No
-- [ ] N/A
+
+- [ ] Yes <!-- TaskRadio phpstan -->
+- [ ] No <!-- TaskRadio phpstan -->
+- [ ] N/A <!-- TaskRadio phpstan -->
 
 ### Included in PHPCS
-- [ ] Yes
-- [ ] No
-- [ ] N/A
+
+- [ ] Yes <!-- TaskRadio phpscs -->
+- [ ] No <!-- TaskRadio phpscs -->
+- [ ] N/A <!-- TaskRadio phpscs -->
 
 ### Included in ESLint
-- [ ] Yes
-- [ ] No
-- [ ] N/A
+
+- [ ] Yes <!-- TaskRadio eslint -->
+- [ ] No <!-- TaskRadio eslint -->
+- [ ] N/A <!-- TaskRadio eslint -->
 
 ### Have unit tests been added
-- [ ] Yes
-- [ ] No
-- [ ] N/A
+
+- [ ] Yes <!-- TaskRadio unit_test -->
+- [ ] No <!-- TaskRadio unit_test -->
+- [ ] N/A <!-- TaskRadio unit_test -->
 
 ### No new errors or warnings in VIP Dashboard
-- [ ] Yes
-- [ ] No
-- [ ] N/A
+
+- [ ] Yes <!-- TaskRadio no_warnings_errors -->
+- [ ] No <!-- TaskRadio no_warnings_errors -->
+- [ ] N/A <!-- TaskRadio no_warnings_errors -->

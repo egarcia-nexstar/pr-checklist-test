@@ -2,45 +2,14 @@ name: Require Checklist
 
 on:
   pull_request:
-    types: [opened, edited, synchronize, ready_for_review]
+    types: [opened, edited, synchronize]
+  issues:
+    types: [opened, edited, deleted]
 
 jobs:
-  validate:
+  job1:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-
-      - name: Enforce checklist
-        run: |
-          BODY="$(jq -r '.pull_request.body' "$GITHUB_EVENT_PATH")"
-
-          # Define checklist groups
-          GROUPS=(
-            "Included in PHPStan"
-            "Included in PHPCS"
-            "Included in ESLint"
-            "Have unit tests been added"
-            "No new errors or warnings in VIP Dashboard"
-          )
-
-          for GROUP in "${GROUPS[@]}"; do
-            # Count how many boxes are checked in this group
-            COUNT=$(echo "$BODY" | awk "/$GROUP/{flag=1; next} /^###/{flag=0} flag && /^\- \[[xX]\]/ {c++} END{print c+0}")
-
-            if [ "$COUNT" -eq 0 ]; then
-              echo "❌ No checkbox selected for $GROUP"
-              exit 1
-            elif [ "$COUNT" -gt 1 ]; then
-              echo "❌ More than one checkbox selected for $GROUP"
-              exit 1
-            fi
-
-            # Fail if "No" is selected
-            NO_SELECTED=$(echo "$BODY" | awk "/$GROUP/{flag=1; next} /^###/{flag=0} flag && /^\- \[[xX]\] No/ {print 1}")
-            if [ "$NO_SELECTED" ]; then
-              echo "❌ '$GROUP' marked as No — cannot merge"
-              exit 1
-            fi
-          done
-
-          echo "✔ Checklist validation passed."
+      - uses: mheap/require-checklist-action@v2
+        with:
+          requireChecklist: false # If this is true and there are no checklists detected, the action will fail
