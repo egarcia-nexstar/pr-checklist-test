@@ -1,66 +1,16 @@
-name: Pull Request Checklist
-description: Required checklist for all pull requests
+name: PR Checklist
+description: Required checklist
 
 body:
   - type: markdown
     attributes:
       value: |
         ## Notes for reviewers
-
         None.
 
-        ## Ticket(s)
-
-        - https://nexstardigital.atlassian.net/browse/WC-
-
   - type: dropdown
-    id: phpstan
     attributes:
-      label: Is the code included in PHPStan?
-      options:
-        - Yes
-        - No
-        - N/A
-    validations:
-      required: true
-
-  - type: dropdown
-    id: phpcs
-    attributes:
-      label: Is the code included in PHPCS?
-      options:
-        - Yes
-        - No
-        - N/A
-    validations:
-      required: true
-
-  - type: dropdown
-    id: eslint
-    attributes:
-      label: Is the code included in ESLint?
-      options:
-        - Yes
-        - No
-        - N/A
-    validations:
-      required: true
-
-  - type: dropdown
-    id: unit_tests
-    attributes:
-      label: Have unit tests been added?
-      options:
-        - Yes
-        - No
-        - N/A
-    validations:
-      required: true
-
-  - type: dropdown
-    id: vip_dashboard
-    attributes:
-      label: No new errors or warnings in VIP Dashboard?
+      label: Included in PHPStan?
       options:
         - Yes
         - No
