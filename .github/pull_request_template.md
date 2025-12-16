@@ -13,35 +13,30 @@ None.
 
 <!-- TaskRadio phpstan -->
 ### Included in PHPStan
-
 - [ ] Yes
 - [ ] No
 - [ ] N/A
 
 <!-- TaskRadio phpcs -->
 ### Included in PHPCS
-
 - [ ] Yes
 - [ ] No
 - [ ] N/A
 
 <!-- TaskRadio eslint -->
 ### Included in ESLint
-
 - [ ] Yes
 - [ ] No
 - [ ] N/A
 
 <!-- TaskRadio unit_tests -->
 ### Have unit tests been added
-
 - [ ] Yes
 - [ ] No
 - [ ] N/A
 
 <!-- TaskRadio vip_dashboard -->
 ### No new errors or warnings in VIP Dashboard
-
 - [ ] Yes
 - [ ] No
 - [ ] N/A
