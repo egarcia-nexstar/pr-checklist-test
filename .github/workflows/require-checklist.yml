@@ -34,8 +34,10 @@ jobs:
           awk -v actor="$ACTOR" -v ts="$TIMESTAMP" '
             /^### / {
               section = substr($0, 5)
+              next
             }
-            /^- \[[x ]\]/ {
+
+            /^- \[[ x]\]/ && section != "" {
               status = ($0 ~ /\[x\]/) ? "Checked" : "Unchecked"
               item = substr($0, 7)
               print "| " section " | " item " | " status " | " actor " | " ts " |"
